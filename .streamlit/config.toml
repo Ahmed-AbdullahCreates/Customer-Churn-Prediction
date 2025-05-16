@@ -1,0 +1,10 @@
+[server]
+maxUploadSize = 50
+
+[browser]
+favicon = "📊"
+
+# Secrets for cloud deployment
+# Uncomment and set your model URL for Streamlit Cloud
+# [secrets]
+# model_url = "https://dl.dropboxusercontent.com/scl/fi/w98qzp01cqv7j61u74ci9/RandomForest_best_model.pkl"

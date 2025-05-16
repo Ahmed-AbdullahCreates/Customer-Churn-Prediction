@@ -563,41 +563,29 @@ def load_model():
         # If local load fails, try to download from cloud storage
         # st.warning(f"Could not load model from local file: {local_error}")
         try:
-            # Check if streamlit_cloud_storage_url is in secrets (for Streamlit Cloud deployment)
+            # First check if model_url is in Streamlit secrets
             if 'model_url' in st.secrets:
-                # st.info("📥 Downloading model from cloud storage...")
+                model_url = st.secrets['model_url']
+                # st.info("📥 Downloading model from cloud storage (from secrets)...")
+            else:
+                # Direct Dropbox link as fallback
+                model_url = "https://dl.dropboxusercontent.com/scl/fi/w98qzp01cqv7j61u74ci9/RandomForest_best_model.pkl"
+                # st.info("📥 Downloading model from Dropbox...")
+            
+            import urllib.request
+            import tempfile
+            
+            # Create a temporary file to store the downloaded model
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pkl') as temp_file:
+                # Download the model from the URL
+                urllib.request.urlretrieve(model_url, temp_file.name)
                 
-                # Download model from the cloud storage URL in secrets
-                import urllib.request
-                import tempfile
+                # Load the downloaded model
+                with open(temp_file.name, 'rb') as file:
+                    model = pickle.load(file)
                 
-                # Create a temporary file to store the downloaded model
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.pkl') as temp_file:
-                    # Download the model from the URL in secrets
-                    urllib.request.urlretrieve(st.secrets['model_url'], temp_file.name)
-                    
-                    # Load the downloaded model
-                    with open(temp_file.name, 'rb') as file:
-                        model = pickle.load(file)
-                    
-                    st.success("✅ Model downloaded and loaded successfully!")
-                    return model
-            # else:
-            #     st.error("⚠️ No model URL found in secrets.")
-                
-            #     # Create a fallback model for demonstration purposes
-            #     from sklearn.ensemble import RandomForestClassifier
-            #     fallback_model = RandomForestClassifier(n_estimators=10, max_depth=5, random_state=42)
-                
-            #     st.warning(
-            #         """
-            #         ⚠️ **Using Demo Model**: The app is running with a simplified demonstration model. 
-                    
-            #         Predictions with this demo model are for illustration purposes only and may not be accurate.
-            #         """
-            #     )
-                
-            #     return fallback_model
+                st.success("✅ Model downloaded and loaded successfully!")
+                return model
                 
         except Exception as cloud_error:
             # st.error(f"Error retrieving model from cloud: {cloud_error}")
